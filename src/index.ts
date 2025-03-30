@@ -8,6 +8,14 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+declare global {
+    namespace Express {
+        interface Request {
+            userId ?: mongoose.Types.ObjectId
+        }
+    }
+}
+
 app.use("/api/v1", mainRouter);
 
 async function main() {
