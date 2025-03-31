@@ -138,19 +138,44 @@ userRouter.put("/update-info", userMiddleware,  async(req,res) => {
 	}
 })
 
-// todo
-userRouter.get("/bulk/:filter", userMiddleware, async(req, res) => {
-	const filter = req.params.filter;
-	const userId = req.userId;
+userRouter.get("/bulk", userMiddleware, async(req, res) => {
+	const filter = req.query.filter || "";
+	// const regex = new RegExp(filter, 'i');
 
 	try {
-		const users = await userModel.find({});
-		console.log(users);
+		//! Approach:1
+		// const users = await userModel.find({
+		// 	$or: [
+		// 		{
+		// 			firstName: regex
+		// 		},
+		// 		{
+		// 			lastName: regex
+		// 		}
+		// 	]
+		// }, 'username firstName lastName _id').exec();
 
+		//! Approach:2
+		const users = await userModel.find({
+			$or: [
+				{
+					username: { "$regex": filter, "$options": "i" }
+				},
+				{
+					firstName: { "$regex": filter, "$options": "i" }
+				},
+				{
+					lastName: { "$regex": filter, "$options": "i" }
+				},
+			]
+		}, 'username firstName lastName _id')
 
-		
+		res.json({
+			users
+		})
 	} catch (error) {
-		
+		res.status(411).json({
+			msg: error
+		})
 	}
-
 })
