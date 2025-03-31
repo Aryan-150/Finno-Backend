@@ -6,24 +6,14 @@ import jwt from "jsonwebtoken";
 import { hasLowerCase, hasNumber, hasSpecialChar, hasUpperCase } from "../zodChecks";
 import { JWT_SECRET } from "../config";
 import { userMiddleware } from "../middlewares/userMiddleware";
+import { requiredSignInBody, requiredSignUpBody, requiredUpdateInfoBody } from "../utils";
 export const userRouter = Router();
 
 userRouter.post("/signup", async(req, res) => {
-	const requiredSignUpData = z.object({
-		username: z.string().min(3).max(30).toLowerCase().trim(),
-		firstName: z.string().max(50).trim(),
-		lastName: z.string().max(50).trim(),
-		password: z.string().min(8)
-			.refine(hasLowerCase, 'password must contain atleast a lowercase letter')
-			.refine(hasUpperCase, "password must contain atleast a uppercase letter")
-			.refine(hasSpecialChar, "password must contain atleast a special character")
-			.refine(hasNumber, "password must contain atleast a number")
-	})
-
-    const parsedSignUpData = requiredSignUpData.safeParse(req.body);
-    if(!parsedSignUpData.success){
+    const { success, error } = requiredSignUpBody.safeParse(req.body);
+    if(!success){
         res.json({
-            msg: "incorrect credential format, " + parsedSignUpData.error.message
+            msg: "incorrect credential format, " + error.message
         })
         return;
     }
@@ -54,19 +44,10 @@ userRouter.post("/signup", async(req, res) => {
 })
 
 userRouter.post("/signin", async(req,res) => {
-	const requiredSignInBody = z.object({
-		username: z.string().min(3).max(30).toLowerCase().trim(),
-		password: z.string().min(8)
-		.refine(hasLowerCase, '')
-		.refine(hasUpperCase, '')
-		.refine(hasSpecialChar, '')
-		.refine(hasNumber, '')
-	})
-
-	const parsedSignInData = requiredSignInBody.safeParse(req.body);
-	if(!parsedSignInData.success){
+	const { success, error } = requiredSignInBody.safeParse(req.body);
+	if(!success){
 		res.json({
-			msg: "incorrect credential format for signin, " + parsedSignInData.error.message
+			msg: "incorrect credential format for signin, " + error.message
 		})
 		return;
 	}
@@ -100,19 +81,7 @@ userRouter.post("/signin", async(req,res) => {
 
 userRouter.put("/update-info", userMiddleware,  async(req,res) => {
 	const userId = req.userId;
-
-	const requiredUpdateCredentialsBody = z.object({
-		firstName: z.string().max(50).trim().optional(),
-		lastName: z.string().max(50).trim().optional(),
-		password: z.string().min(8)
-		.refine(hasLowerCase, '')
-		.refine(hasUpperCase, '')
-		.refine(hasSpecialChar, '')
-		.refine(hasNumber, '')
-		.optional()
-	})
-
-	const { success, error } = requiredUpdateCredentialsBody.safeParse(req.body);
+	const { success, error } = requiredUpdateInfoBody.safeParse(req.body);
 	if(!success){
 		res.json({
 			msg: "incorrect input format, " + error.message
@@ -121,13 +90,10 @@ userRouter.put("/update-info", userMiddleware,  async(req,res) => {
 	}
 	
 	try {
-		// const user = await userModel.findOne({
-		// 	_id: userId
-		// });
-		// if(!user) throw new Error("user not found");
-
-		await userModel.updateOne({_id: userId}, req.body);
-
+		await userModel.updateOne({
+			_id: userId
+		}, req.body);
+		
 		res.json({
 			msg: "upadated the user"
 		})
