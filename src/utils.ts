@@ -17,10 +17,10 @@ export const requiredSignUpBody = z.object({
 export const requiredSignInBody = z.object({
     username: z.string().min(3).max(30).toLowerCase().trim(),
     password: z.string().min(8)
-    .refine(hasLowerCase, '')
-    .refine(hasUpperCase, '')
-    .refine(hasSpecialChar, '')
-    .refine(hasNumber, '')
+    .refine(hasLowerCase, 'password must contain atleast a lowercase letter')
+    .refine(hasUpperCase, 'password must contain atleast a uppercase letter')
+    .refine(hasSpecialChar, 'password must contain atleast a special character')
+    .refine(hasNumber, 'password must contain atleast a number')
 })
 
 // zod validation object for /user/update-info
@@ -28,9 +28,15 @@ export const requiredUpdateInfoBody = z.object({
     firstName: z.string().max(50).trim().optional(),
     lastName: z.string().max(50).trim().optional(),
     password: z.string().min(8)
-    .refine(hasLowerCase, '')
-    .refine(hasUpperCase, '')
-    .refine(hasSpecialChar, '')
-    .refine(hasNumber, '')
+    .refine(hasLowerCase, 'password must contain atleast a lowercase letter')
+    .refine(hasUpperCase, 'password must contain atleast a uppercase letter')
+    .refine(hasSpecialChar, 'password must contain atleast a special character')
+    .refine(hasNumber, 'password must contain atleast a number')
     .optional()
+})
+
+// zod validation object for /account/transfer
+export const requiredTransferBody = z.object({
+    to: z.string().trim(),
+    amount: z.number().max(100000)
 })

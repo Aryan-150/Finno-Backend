@@ -1,9 +1,7 @@
 import { Router } from "express";
 import bcrypt from "bcrypt";
-import { userModel } from "../db";
-import { z } from "zod";
+import { Accounts, Users } from "../db";
 import jwt from "jsonwebtoken";
-import { hasLowerCase, hasNumber, hasSpecialChar, hasUpperCase } from "../zodChecks";
 import { JWT_SECRET } from "../config";
 import { userMiddleware } from "../middlewares/userMiddleware";
 import { requiredSignInBody, requiredSignUpBody, requiredUpdateInfoBody } from "../utils";
@@ -24,19 +22,29 @@ userRouter.post("/signup", async(req, res) => {
 
     try {
         const hashPassword = await bcrypt.hash(password, 10);
+
+		const isUserNameExist = await Users.findOne({
+			username: username
+		})
+
+		if(isUserNameExist) throw new Error("user with given username already exists, try different username");
         
-        await userModel.create({
+        const user = await Users.create({
             username: username,
             firstName: firstName,
             lastName: lastName,
             password: hashPassword
         })
 
+		await Accounts.create({
+			userId: user._id
+		})
+
         res.status(200).json({
-            msg: "user signed up"
+            msg: "user signed up with account"
         })
         
-    } catch (error) {
+    } catch (error) {	
         res.status(411).json({
             msg: "error" + error
         })
@@ -56,7 +64,7 @@ userRouter.post("/signin", async(req,res) => {
 	const password = req.body.password;
 
 	try {
-		const user = await userModel.findOne({
+		const user = await Users.findOne({
 			username: username
 		})
 		if(!user) throw new Error("user not found");
@@ -90,7 +98,7 @@ userRouter.put("/update-info", userMiddleware,  async(req,res) => {
 	}
 	
 	try {
-		await userModel.updateOne({
+		await Users.updateOne({
 			_id: userId
 		}, req.body);
 		
@@ -110,7 +118,7 @@ userRouter.get("/bulk", userMiddleware, async(req, res) => {
 
 	try {
 		//! Approach:1
-		// const users = await userModel.find({
+		// const users = await Users.find({
 		// 	$or: [
 		// 		{
 		// 			firstName: regex
@@ -122,7 +130,7 @@ userRouter.get("/bulk", userMiddleware, async(req, res) => {
 		// }, 'username firstName lastName _id').exec();
 
 		//! Approach:2
-		const users = await userModel.find({
+		const users = await Users.find({
 			$or: [
 				{
 					username: { "$regex": filter, "$options": "i" }
