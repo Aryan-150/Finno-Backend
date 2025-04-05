@@ -37,7 +37,8 @@ userRouter.post("/signup", async(req, res) => {
         })
 
 		await Accounts.create({
-			userId: user._id
+			userId: user._id,
+			balance: (Math.random() * 50000).toFixed(2)
 		})
 
         res.status(200).json({

@@ -23,7 +23,7 @@ const accountSchema = new mongoose.Schema({
         required: true
     },
     balance: {
-        type: Number, default: 50000
+        type: Number, required: true
     }
 })
 
