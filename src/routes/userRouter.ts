@@ -77,9 +77,10 @@ userRouter.post("/signin", async(req,res) => {
 			userId: user._id,
 		}, JWT_SECRET);
 
+		req.session.token = userJwtToken
 		res.json({
 			msg: "signin done",
-			token: userJwtToken
+			// token: userJwtToken
 		})
 	} catch (error) {
 		res.status(411).json({

@@ -47,7 +47,7 @@ accountRouter.post("/transfer",userMiddleware, async(req,res) => {
             })
             return;
         }
-        const toAccount = await Accounts.findOne({ userId: userId }).session(session);
+        const toAccount = await Accounts.findOne({ userId: to }).session(session);
         if(!toAccount || toAccount.userId === fromAccount.userId){
             await session.abortTransaction();
             res.json({
@@ -58,12 +58,12 @@ accountRouter.post("/transfer",userMiddleware, async(req,res) => {
         
         // perform the transactions:
         await Accounts.findOneAndUpdate(
-            { userId: userId },
+            { _id: fromAccount._id },
             { $inc: { balance: -amount } }
         ).session(session)
 
         await Accounts.findOneAndUpdate(
-            { userId: to }, 
+            { _id: toAccount._id }, 
             { $inc: { balance: amount } }
         ).session(session)
 
@@ -75,6 +75,21 @@ accountRouter.post("/transfer",userMiddleware, async(req,res) => {
     } catch (error) {
         res.status(400).json({
             error
+        })
+    }
+})
+
+accountRouter.get("/all", async(req,res) => {
+    try {
+        const allAccounts = await Accounts.find().populate("userId", "username");
+        if(!allAccounts) throw new Error("error while hitting the database");
+        
+        res.json({
+            allAccounts
+        })
+    } catch (error) {
+        res.status(411).json({
+            msg: error
         })
     }
 })
