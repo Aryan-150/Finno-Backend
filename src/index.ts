@@ -5,16 +5,23 @@ import session, { Session, SessionData } from "express-session";
 import { DB_NAME, DB_URL, PORT } from "./config";
 import { mainRouter } from "./routes/mainRouter";
 
+type User = {
+    username: string;
+    firstName: string;
+    lastName: string;
+}
+
 declare module 'express-session' {
     interface SessionData {
       token: string;    // extend the sessionData with token
+      userId ?: mongoose.Types.ObjectId;
+      user: User
     }
 }
   
 declare global {
     namespace Express {
         interface Request {
-            userId ?: mongoose.Types.ObjectId,
             session: Session & Partial<SessionData>
         }
     }

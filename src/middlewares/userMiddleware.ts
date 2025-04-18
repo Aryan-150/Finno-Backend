@@ -17,7 +17,7 @@ export const userMiddleware = async(req: Request ,res: Response,next: NextFuncti
         });
         if(!user) throw new Error("user not found");
 
-        req.userId = user._id;
+        req.session.userId = user._id;
         next();
     } catch (error) {
         res.status(403).json({

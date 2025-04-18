@@ -10,8 +10,9 @@ export const userRouter = Router();
 userRouter.post("/signup", async(req, res) => {
     const { success, error } = requiredSignUpBody.safeParse(req.body);
     if(!success){
-        res.json({
-            msg: "incorrect credential format, " + error.message
+        res.status(411).json({
+			errorType: "zod",
+            msg: JSON.parse(error.message)
         })
         return;
     }
@@ -27,7 +28,7 @@ userRouter.post("/signup", async(req, res) => {
 			username: username
 		})
 
-		if(isUserNameExist) throw new Error("user with given username already exists, try different username");
+		if(isUserNameExist) throw new Error("username already exists");
         
         const user = await Users.create({
             username: username,
@@ -47,16 +48,19 @@ userRouter.post("/signup", async(req, res) => {
         
     } catch (error) {	
         res.status(411).json({
-            msg: "error" + error
+			errorType: "normal",
+            msg: "error: " + error
         })
+		return;
     }
 })
 
 userRouter.post("/signin", async(req,res) => {
 	const { success, error } = requiredSignInBody.safeParse(req.body);
 	if(!success){
-		res.json({
-			msg: "incorrect credential format for signin, " + error.message
+		res.status(411).json({
+			errorType: "zod",
+			msg: JSON.parse(error.message)
 		})
 		return;
 	}
@@ -78,19 +82,39 @@ userRouter.post("/signin", async(req,res) => {
 		}, JWT_SECRET);
 
 		req.session.token = userJwtToken
-		res.json({
+		const sessionUser = {
+			username: user.username,
+			firstName: user.firstName,
+			lastName: user.lastName
+		}
+		req.session.user = sessionUser;
+		res.status(200).json({
 			msg: "signin done",
-			// token: userJwtToken
+			user: sessionUser,
 		})
 	} catch (error) {
 		res.status(411).json({
-			msg: 'error while signin, ' + error
+			errorType: "normal",
+			msg: error?.toString()
 		})
 	}
 })
 
+userRouter.post("/logout", userMiddleware , (req,res) => {
+	req.session.destroy((err) => {
+		if (err) {
+			console.error('Session destruction error:', err);
+			return res.status(500).json({ message: 'Logout failed' });
+		  }
+	  
+		  // Clear the cookie on client side
+		  res.clearCookie('connect.sid'); // use the same name as your session cookie
+		  res.json({ message: 'Logged out successfully' });
+	})
+})
+
 userRouter.put("/update-info", userMiddleware,  async(req,res) => {
-	const userId = req.userId;
+	const userId = req.session.userId;
 	const { success, error } = requiredUpdateInfoBody.safeParse(req.body);
 	if(!success){
 		res.json({

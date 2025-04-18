@@ -6,7 +6,7 @@ import mongoose from "mongoose";
 export const accountRouter = Router();
 
 accountRouter.get("/balance",userMiddleware, async(req,res) => {
-    const userId = req.userId;
+    const userId = req.session.userId;
 
     try {
         const user = await Accounts.findOne({
@@ -33,7 +33,7 @@ accountRouter.post("/transfer",userMiddleware, async(req,res) => {
 
     const to = req.body.to;
     const amount = req.body.amount;
-    const userId = req.userId;
+    const userId = req.session.userId;
 
     try {
         const session = await mongoose.startSession();
