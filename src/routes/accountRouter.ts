@@ -81,7 +81,7 @@ accountRouter.post("/transfer",userMiddleware, async(req,res) => {
 
 accountRouter.get("/all", async(req,res) => {
     try {
-        const allAccounts = await Accounts.find().populate("userId", "username");
+        const allAccounts = await Accounts.find({}, '_id').populate("userId", "username");
         if(!allAccounts) throw new Error("error while hitting the database");
         
         res.json({

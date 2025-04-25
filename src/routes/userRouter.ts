@@ -49,7 +49,7 @@ userRouter.post("/signup", async(req, res) => {
     } catch (error) {	
         res.status(411).json({
 			errorType: "normal",
-            msg: "error: " + error
+            msg: error?.toString()
         })
 		return;
     }
