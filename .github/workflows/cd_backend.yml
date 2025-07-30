@@ -16,9 +16,10 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             whoami
+            source ~/.bashrc
             cd ~/paytm-Backend
             git pull origin main
-            export PATH=$PATH:/home/ubuntu/.nvm/versions/node/v24.4.1/bin/node
+            echo "pull complete"
             npm install
             npm run build
             pm2 restart "finno_be"
