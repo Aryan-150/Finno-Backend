@@ -18,7 +18,7 @@ jobs:
             whoami
             cd ~/paytm-Backend
             git pull origin main
-            source ~/.bashrc
+            export PATH=$PATH:/home/ubuntu/.nvm/versions/node/v24.4.1/bin/node
             npm install
             npm run build
             pm2 restart "finno_be"
