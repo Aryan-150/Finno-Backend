@@ -1,0 +1,26 @@
+name: deploying the backend to vm
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: ssh into vm and deploy the docker image for backend
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ubuntu
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            whoami
+            cd ~/paytm-Backend
+            git pull origin main
+            source ~/.bashrc
+            npm install
+            npm run build
+            pm2 restart "finno_be"
+
+

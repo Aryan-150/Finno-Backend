@@ -2,7 +2,7 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import session, { Session, SessionData } from "express-session";
-import { DB_NAME, DB_URL, PORT } from "./config";
+import { DB_NAME, DB_URL, PORT, SESSION_SECRET } from "./config";
 import { mainRouter } from "./routes/mainRouter";
 
 type User = {
@@ -34,10 +34,10 @@ app.use(cors({
     credentials: true, // Allow credentials (cookies)
 }));
 app.use(session({
-    secret: "shhh, very secret",
+    secret: SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    cookie: {},
+    cookie: { httpOnly: true, sameSite: "lax" },
 }))
 app.use("/api/v1", mainRouter);
 
@@ -47,6 +47,6 @@ async function main() {
     app.listen(PORT, () => {
         console.log('server is listeniong at port: ' + PORT);
     })
-}
+} 
 
 main();
