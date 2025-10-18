@@ -38,7 +38,7 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: { httpOnly: true, sameSite: "lax" },
-}))
+}));
 app.use("/api/v1", mainRouter);
 
 async function main() {

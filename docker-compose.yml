@@ -1,0 +1,20 @@
+version: '3.8'
+services:
+  mongo:
+    image: mongo:latest
+    ports:
+      - 27017:27017
+    volumes:
+      - finno_be_db:/data/db
+
+  finno_be:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - 3000:3000
+    depends_on:
+      - mongo
+
+volumes:
+  finno_be_db:

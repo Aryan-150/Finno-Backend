@@ -8,21 +8,52 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: ssh into vm and deploy the docker image for backend
-        uses: appleboy/ssh-action@v1
+      - name: checkout the code
+        uses: actions/checkout@v2
+
+      - name: docker login
+        uses: docker/login-action@v2
         with:
-          host: ${{ secrets.VM_HOST }}
-          username: ubuntu
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            whoami
-            export PATH=$PATH:/home/ubuntu/.nvm/versions/node/v24.4.1/bin
-            source ~/.bashrc
-            cd ~/paytm-Backend
-            git pull origin main
-            echo "pull complete"
-            npm install
-            npm run build
-            pm2 restart "finno_be"
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: build and push to dockerhub
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./docker/Dockerfile.backend
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/todo_app_be:${{ github.sha }}
 
+      - name: ssh into vm and run docker images
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" >& ~/ssh_key
+          chmod 700 ~/ssh_key
+          ssh -o StrictHostKeyChecking=no -i ~/ssh_key ubuntu@${{ secrets.VM_HOST }} << 'EOF'
+            echo "hello world"
+
+            if ! docker network inspect finno_be_network >/dev/null 2>&1; then
+              docker network create finno_be_network
+            fi
+
+            if ! docker volume inspect finno_be_volume >/dev/null 2>&1; then
+              docker volume create finno_be_volume
+            fi
+
+            if [ -z "$(docker ps -q -f name=mongo)" ]; then
+              docker run -d --name mongo -p 27017:27017 \
+              --network finno_be_network -v finno_be_volume:/data/db mongo
+            fi
+
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/finno_be:${{ github.sha }}
+
+            if [ "$(docker ps -a -q -f name=finno_be)" ]; then
+              docker rm -f finno_be
+            fi
+
+            docker run -d --name finno_be --network finno_be_network \
+            -p 3000:3000 ${{ secrets.DOCKERHUB_USERNAME }}/finno_be:${{ github.sha }}
+
+            docker image prune --all --force
+
+          EOF
