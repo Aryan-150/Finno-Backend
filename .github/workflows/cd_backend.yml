@@ -21,9 +21,9 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: ./docker/Dockerfile.backend
+          file: Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/todo_app_be:${{ github.sha }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/finno_be:${{ github.sha }}
 
       - name: ssh into vm and run docker images
         run: |
