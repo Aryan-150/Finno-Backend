@@ -2,7 +2,6 @@ import { Router } from "express";
 import bcrypt from "bcrypt";
 import { Accounts, Users } from "../db";
 import jwt from "jsonwebtoken";
-import { JWT_SECRET } from "../config";
 import { userMiddleware } from "../middlewares/userMiddleware";
 import { requiredSignInBody, requiredSignUpBody, requiredUpdateInfoBody } from "../utils";
 export const userRouter = Router();
@@ -79,7 +78,7 @@ userRouter.post("/signin", async (req, res) => {
 
 		const userJwtToken = jwt.sign({
 			userId: user._id,
-		}, JWT_SECRET);
+		}, process.env.JWT_SECRET!);
 
 		req.session.token = userJwtToken
 		const sessionUser = {

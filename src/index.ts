@@ -1,8 +1,10 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import session, { Session, SessionData } from "express-session";
-import { DB_NAME, DB_URL, PORT, SESSION_SECRET } from "./config";
 import { mainRouter } from "./routes/mainRouter";
 
 type User = {
@@ -34,7 +36,7 @@ app.use(cors({
     credentials: true, // Allow credentials (cookies)
 }));
 app.use(session({
-    secret: SESSION_SECRET,
+    secret: process.env.SESSION_SECRET!,
     resave: false,
     saveUninitialized: false,
     cookie: { httpOnly: true, sameSite: "lax" },
@@ -42,10 +44,11 @@ app.use(session({
 app.use("/api/v1", mainRouter);
 
 async function main() {
-    await mongoose.connect(`${DB_URL}/${DB_NAME}`);
+    await mongoose.connect(`${process.env.DB_URL}/${process.env.DB_NAME}`);
     console.log('db connected');
-    app.listen(PORT, () => {
-        console.log('server is listeniong at port: ' + PORT);
+    
+    app.listen(process.env.PORT, () => {
+        console.log('server is listening at port: ' + process.env.PORT);
     })
 } 
 

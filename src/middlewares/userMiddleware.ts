@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import { JWT_SECRET } from "../config";
 import { Users } from "../db";
 
 export const userMiddleware = async(req: Request ,res: Response,next: NextFunction) => {
@@ -11,7 +10,7 @@ export const userMiddleware = async(req: Request ,res: Response,next: NextFuncti
     try {
         if(!token) throw new Error("token not found");
         
-        const decodedInfo = jwt.verify(token, JWT_SECRET) as JwtPayload;
+        const decodedInfo = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
         const user = await Users.findOne({
             _id: decodedInfo.userId
         });
