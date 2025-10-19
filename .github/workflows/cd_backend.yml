@@ -40,21 +40,26 @@ jobs:
               docker volume create finno_be_volume
             fi
 
+            echo "hello world"
             if [ -z "$(docker ps -q -f name=mongo)" ]; then
               docker run -d --name mongo -p 27017:27017 \
               --network finno_be_network -v finno_be_volume:/data/db mongo
             fi
 
+            echo "hello world"
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/finno_be:${{ github.sha }}
+
+            docker images
 
             if [ "$(docker ps -a -q -f name=finno_be)" ]; then
               docker rm -f finno_be
             fi
 
+            echo "running the backend container"
             docker run -d --name finno_be --network finno_be_network \
             -e PORT=3000 \
             -e DB_URL="${{ secrets.DB_URL }}" \
-            -e DB_NAME="${{ secrets.DB_NAME }}" \ 
+            -e DB_NAME="${{ secrets.DB_NAME }}" \
             -e JWT_SECRET="${{ secrets.JWT_SECRET }}" \
             -e SESSION_SECRET="${{ secrets.SESSION_SECRET }}" \
             -p 3000:3000 ${{ secrets.DOCKERHUB_USERNAME }}/finno_be:${{ github.sha }}
