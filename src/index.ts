@@ -31,11 +31,13 @@ declare global {
 
 const app = express();
 app.use(express.json());
-const whitelist = ['https://finno.aryanbachchu.tech', 'http://localhost:5173', 'https://api.finno.aryanbachchu.tech'];
+const whitelist = ['https://finno.aryanbachchu.tech', 'http://localhost:5173']
 
 app.use(cors({
     origin: function (origin, callback) {
-        if (origin && whitelist.indexOf(origin) !== -1) {
+        if(!origin) return callback(null, true);
+
+        if (whitelist.indexOf(origin) !== -1) {
             callback(null, true)
         } else {
             callback(new Error('Not allowed by CORS'))
@@ -47,14 +49,14 @@ app.use(session({
     secret: process.env.SESSION_SECRET!,
     resave: false,
     saveUninitialized: false,
-    cookie: { httpOnly: true, sameSite: "lax" },
+    cookie: { httpOnly: true, sameSite: "lax", secure: true, maxAge: 24 * 60 * 60 * 1000 },
 }));
 app.use("/api/v1", mainRouter);
 
 async function main() {
     console.log(`${process.env.DB_URL}/${process.env.DB_NAME}?replicaSet=mongoSet`);
     await mongoose.connect(`${process.env.DB_URL}/${process.env.DB_NAME}?replicaSet=mongoSet`, {
-        serverSelectionTimeoutMS: 20000
+        serverSelectionTimeoutMS: 40000
     });
     console.log('db connected');
 
