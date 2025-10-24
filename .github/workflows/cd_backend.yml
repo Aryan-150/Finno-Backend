@@ -85,6 +85,7 @@ jobs:
               docker rm -f finno_be
             fi
 
+            echo "start docker run finno_be"
             docker run -d --name finno_be --network finno_be_network \
             -e PORT=3000 \
             -e DB_URL="${{ secrets.DB_URL }}" \
@@ -92,6 +93,7 @@ jobs:
             -e JWT_SECRET="${{ secrets.JWT_SECRET }}" \
             -e SESSION_SECRET="${{ secrets.SESSION_SECRET }}" \
             -p 3000:3000 ${{ secrets.DOCKERHUB_USERNAME }}/finno_be:${{ github.sha }}
+            echo "end docker run finno_be"
 
             docker image prune --all --force
 
