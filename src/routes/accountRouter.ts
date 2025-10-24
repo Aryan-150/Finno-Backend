@@ -37,8 +37,8 @@ accountRouter.post("/transfer",userMiddleware, async(req,res) => {
 
     try {
         const session = await mongoose.startSession();
-
         session.startTransaction();
+
         const fromAccount = await Accounts.findOne({ userId: userId }).session(session);
         if(!fromAccount || (fromAccount?.balance as Number) < amount){
             await session.abortTransaction();
@@ -59,13 +59,13 @@ accountRouter.post("/transfer",userMiddleware, async(req,res) => {
         // perform the transactions:
         await Accounts.findOneAndUpdate(
             { _id: fromAccount._id },
-            { $inc: { balance: -amount } }
-        ).session(session)
+            { $inc: { balance: -amount } },
+        ).session(session);
 
         await Accounts.findOneAndUpdate(
             { _id: toAccount._id }, 
-            { $inc: { balance: amount } }
-        ).session(session)
+            { $inc: { balance: amount } },
+        ).session(session);
 
         res.json({
             msg: "transaction completed"

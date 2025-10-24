@@ -1,12 +1,23 @@
-version: '3.8'
 services:
   mongo:
+    image: mongo:7
     container_name: mongodb
-    image: mongo:latest
+    command: ["--replSet", "rs0", "--bind_ip_all"]
     ports:
-      - 27017:27017
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
     volumes:
-      - finno_be_db:/data/db
+      - mongo_data:/data/db
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    healthcheck:
+      test: echo "try { rs.status() } catch (err) { rs.initiate({_id:'rs0',members:[{_id:0,host:'mongo:27017'}]}) }" | mongosh --port 27017 --quiet
+      interval: 5s
+      timeout: 30s
+      start_period: 0s
+      start_interval: 1s
+      retries: 30
 
   finno_be:
     build:
@@ -18,4 +29,4 @@ services:
       - mongo
 
 volumes:
-  finno_be_db:
+  mongo_data:

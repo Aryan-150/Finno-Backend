@@ -31,7 +31,7 @@ declare global {
 
 const app = express();
 app.use(express.json());
-const whitelist = ['https://finno.aryanbachchu.tech', 'http://localhost:5173']
+const whitelist = ['https://finno.aryanbachchu.tech', 'http://localhost:5173', 'https://api.finno.aryanbachchu.tech'];
 
 app.use(cors({
     origin: function (origin, callback) {
@@ -52,7 +52,10 @@ app.use(session({
 app.use("/api/v1", mainRouter);
 
 async function main() {
-    await mongoose.connect(`${process.env.DB_URL}/${process.env.DB_NAME}`);
+    console.log(`${process.env.DB_URL}/${process.env.DB_NAME}?replicaSet=mongoSet`);
+    await mongoose.connect(`${process.env.DB_URL}/${process.env.DB_NAME}?replicaSet=mongoSet`, {
+        serverSelectionTimeoutMS: 20000
+    });
     console.log('db connected');
 
     app.listen(process.env.PORT, () => {
