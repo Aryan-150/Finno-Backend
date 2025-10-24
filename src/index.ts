@@ -45,7 +45,7 @@ app.use(session({
 app.use("/api/v1", mainRouter);
 
 async function main() {
-    await mongoose.connect(`${process.env.DB_URL}/${process.env.DB_NAME}?replicaSet=mongoSet`, {
+    await mongoose.connect(`${process.env.DB_URL}/${process.env.DB_NAME}?replicaSet=rs0`, {
         serverSelectionTimeoutMS: 40000
     });
     console.log('db connected');
