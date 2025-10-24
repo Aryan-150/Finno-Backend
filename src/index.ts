@@ -49,15 +49,13 @@ app.use(session({
     secret: process.env.SESSION_SECRET!,
     resave: false,
     saveUninitialized: false,
-    cookie: { httpOnly: true, sameSite: "lax", secure: true, maxAge: 24 * 60 * 60 * 1000 },
+    cookie: { httpOnly: true, sameSite: "lax" },
 }));
 app.use("/api/v1", mainRouter);
 
 async function main() {
-    console.log(`${process.env.DB_URL}/${process.env.DB_NAME}?replicaSet=mongoSet`);
-    await mongoose.connect(`${process.env.DB_URL}/${process.env.DB_NAME}?replicaSet=mongoSet`, {
-        serverSelectionTimeoutMS: 40000
-    });
+    console.log(`${process.env.DB_URL}/${process.env.DB_NAME}`);
+    await mongoose.connect(`${process.env.DB_URL}/${process.env.DB_NAME}`);
     console.log('db connected');
 
     app.listen(process.env.PORT, () => {

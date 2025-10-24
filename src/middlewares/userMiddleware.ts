@@ -3,10 +3,7 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import { Users } from "../db";
 
 export const userMiddleware = async(req: Request ,res: Response,next: NextFunction) => {
-    // const token = req.headers.authorization as string;
     const token = req.session.token;
-    // console.log(token);
-
     try {
         if(!token) throw new Error("token not found");
         
