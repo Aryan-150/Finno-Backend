@@ -35,7 +35,7 @@ const whitelist = ['https://finno.aryanbachchu.tech', 'http://localhost:5173']
 
 app.use(cors({
     origin: function (origin, callback) {
-        if(!origin) return callback(null, true);
+        if (!origin) return callback(null, true);
 
         if (whitelist.indexOf(origin) !== -1) {
             callback(null, true)
@@ -54,8 +54,9 @@ app.use(session({
 app.use("/api/v1", mainRouter);
 
 async function main() {
-    console.log(`${process.env.DB_URL}/${process.env.DB_NAME}`);
-    await mongoose.connect(`${process.env.DB_URL}/${process.env.DB_NAME}`);
+    await mongoose.connect(`${process.env.DB_URL}/${process.env.DB_NAME}?replicaSet=mongoSet`, {
+        serverSelectionTimeoutMS: 40000
+    });
     console.log('db connected');
 
     app.listen(process.env.PORT, () => {
