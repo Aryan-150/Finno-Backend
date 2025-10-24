@@ -31,18 +31,9 @@ declare global {
 
 const app = express();
 app.use(express.json());
-const whitelist = ['https://finno.aryanbachchu.tech', 'http://localhost:5173']
 
 app.use(cors({
-    origin: function (origin, callback) {
-        if (!origin) return callback(null, true);
-
-        if (whitelist.indexOf(origin) !== -1) {
-            callback(null, true)
-        } else {
-            callback(new Error('Not allowed by CORS'))
-        }
-    },
+    origin: "https://finno.aryanbachchu.tech",
     credentials: true, // Allow credentials (cookies)
 }));
 app.use(session({
